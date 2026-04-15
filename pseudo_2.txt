@@ -165,15 +165,9 @@ def build_leaf(data_subset)
 # TREE BUILDING
 # --------------------------
 
-def build_tree(data_subset, depth, split_number, criterion)
+def build_tree(data_subset, depth, split_number, criterion, min_samples)
 
-    if length(data_subset) == 0
-        return build_leaf(data_subset)
-
-    if depth == 0
-        return build_leaf(data_subset)
-
-    if purity(data_subset) == true
+    if length(data_subset) == 0 or depth == 0 or purity(data_subset) == true or length(data_subset) < min_samples:
         return build_leaf(data_subset)
 
     total_feature_count = length(data_subset[0].features)
@@ -199,8 +193,8 @@ def build_tree(data_subset, depth, split_number, criterion)
     if length(left_data) == 0 or length(right_data) == 0
         return build_leaf(data_subset)
 
-    left_node = build_tree(left_data, depth - 1, split_number, criterion)
-    right_node = build_tree(right_data, depth - 1, split_number, criterion)
+    left_node = build_tree(left_data, depth - 1, split_number, criterion, min_samples)
+    right_node = build_tree(right_data, depth - 1, split_number, criterion, min_samples)
 
     return Node(best_feature, best_threshold, left_node, right_node)
 
@@ -237,13 +231,13 @@ def run_tree_probability(row, tree)
 # FOREST BUILDING
 # --------------------------
 
-def build_forest(data, num_trees, depth, split_number, criterion)
+def build_forest(data, num_trees, depth, split_number, criterion, min_samples)
     forest = Forest()
     forest.trees = []
 
     for i in 0 to num_trees - 1
         sample = bootstrap_sample(data)
-        tree = build_tree(sample, depth, split_number, criterion)
+        tree = build_tree(sample, depth, split_number, criterion, min_samples)
         append tree to forest.trees
 
     return forest
